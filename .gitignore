@@ -1,0 +1,10 @@
+# IDE (Eclipse)
+.classpath
+.project
+.settings/
+
+# TextEdit
+*~
+
+# OS (Mac OS X)
+.DS_Store
