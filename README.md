@@ -1,1 +1,3 @@
-Thank you.
+A collation of very messy old R code, exploring graphics features and elementary maths / stats in tandem. There are also some demonstrations of R language/syntax quirks. The code includes libraries of default plot objects and utility functions (ggplot2 theme generators, plotmath label generators, border strippers, etc.). The point of this project is to prune, organize and refine, until it's all a bit more coherent and possibly even useful.
+
+Actually the real point of this project is to teach myself git, egit and github.
