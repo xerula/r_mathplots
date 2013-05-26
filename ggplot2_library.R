@@ -1,12 +1,6 @@
-# TODO: Add comment
-# 
-# Author: xerula
-###############################################################################
-
-
 library(ggplot2)
 
-# themes
+### THEMES
 
 # wallcloud
 # example: 
@@ -46,7 +40,9 @@ new_plain_theme <- function(color){
     new_theme$title <- element_blank()
     new_theme$legend.position <- "none"
     theme_set(new_theme)
-}
+    }
+
+### PLOT FORMATTING AND ANNOTATION 
 
 # plot (the previous plot, by default) with panel only, no border
 unborderize <- function(p=last_plot()){
@@ -54,53 +50,52 @@ unborderize <- function(p=last_plot()){
     innards <- ggplot_gtable(ggplot_build(p))
     subplot <- subset(innards$layout, name == "panel")
     with(subplot, grid.draw(innards[t:b, l:r]))
-}
+    }
 
+# take list of (one-liner) functions and return an expression vector of their bodies for plot labelling
+# this may seem nifty but it is often better to create custom formatted labels
+# for use with plotMultiFunc
+
+func2expr <- function(funcs){
+    k <- Vectorize(body)(funcs)
+    sapply(k, as.expression)
+    }
+
+### PLOT GENERATION FUNCTIONS
 
 # PLOT multiple f(x) curves for different values of some parameter in f(x), e.g. f(x) = A*x^2
-# this function takes a function 'expr' in terms of variables 'var' and 's' (sequence), and evaluates and plots the function over domain 's' separately for each value of 'var',
-# for example, if we want to see how the plot of the function f(x) = A*x^2 changes for different values of A, we would do plotMultiCurve(quote(A * x^2), x, A), where x is a vector of values over which we evaluate A*x^2 for each of the values in vector A
+# this function takes a function 'expr' in terms of variables 'var' and 's' (sequence), and 
+# evaluates and plots the function over domain 's' separately for each value of 'var',
+# for example, if we want to see how the plot of the function f(x) = A*x^2 changes for different values of A,
+# we would do plotMultiCurve(quote(A * x^2), x, A), where x is a vector of values over which we evaluate
+# A*x^2 for each of the values in vector A
 # the names of the variables in 'expr' must match the names of the corresponding objects supplied as 's' and 'var'
-# if 'negs' is true, for each value in A, the function is also evaluated for its additive inverse, and plotted in the same color
+# 'extend' can supply a function to extend 'var' (e.g. to also evaluate f(x) for the additive or
+# multiplicative inverses of the values in 'var'). Corresponding values are given the same 'color' factor
 
-plotMultiCurve <- function(expr, s, var, negs=T, title=""){
+
+plotMultiCurve <- function(expr, s, var, extend=NULL){
     domain <- deparse(substitute(s))
     f_var <- deparse(substitute(var))
     expr <- deparse(expr)
     expr <- gsub(f_var, "var", expr, fixed=T)
     expr <- gsub(domain, "rep(s, each=length(var))", expr, fixed=T)
     old_var <- var
-    if(negs == T){
-        var <- c(var, -var)
-        old_var <- rep(old_var, 2)
-    }
+    if(!is.null(extend)){
+        var <- c(var, extend(var))
+        old_var <- rep(old_var, 1 + length(extend(var[1])))
+        }
     res <- eval(parse(text=expr))
     df <- data.frame(x=rep(s, each=length(var)), y=res, color=rep(old_var, length(s)), var=rep(var, length(s)))
     ggplot(data=df, aes(x, y, group=factor(var)))
-}
+    }
 
 # overplot multiple functions for same domain 'x'
 plotMultiFunc <- function(funcs, x){
     temp <- unlist(lapply(funcs, do.call, args=list(x=x)))
     res <- data.frame(x=rep(x, length(funcs)), y=temp, func=rep(1:length(funcs), each=length(x)))
     ggplot(data=res, aes(x, y, group=func))
-}
-
-# take list of (one-line) functions and return an expression vector of their bodies for plot labelling
-# this may seem nifty but it is often better to create custom formatted labels
-func2expr <- function(funcs){
-    exprs <- vector(mode="expression", length(funcs))
-    for(i in 1:length(exprs)){
-        exprs[i] <- as.expression(body(funcs[[i]]))
     }
-    exprs
-}
-
-# nicer version
-func2expr <- function(funcs){
-    k <- Vectorize(body)(funcs)
-    sapply(k, as.expression)
-}
 
 # for when each curve is a separate data frame column
 overplot <- function(df){
@@ -108,5 +103,5 @@ overplot <- function(df){
     p <- ggplot(data=df, aes_string(x=curveNames[1]))
     layers <- sapply(curveNames[-1], function(x) geom_line(aes_string(y=x)))
     p + layers
-}
+    }
 
