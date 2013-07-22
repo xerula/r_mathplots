@@ -14,14 +14,14 @@ plotMultiCurve(quote(As * s1^2), s1, As, extend=function(x) -x) -> p
 
 p + geom_path(aes(color=factor(color))) +
     coord_cartesian(ylim=c(-100,100), xlim=c(-10, 10)) +
-    labs(ylab=expression(A*x^2)) + scale_color_discrete(name="A & -A") + 
+    ylab(expression(A*x^2)) + scale_color_discrete(name="A & -A") + 
     labs(title=c(expression(f(x) == A*x^2 ~~"for different A"))) 
 
 plotMultiCurve(quote(As * s1^2 + 2), s1, As) -> p
 
 p + geom_path(aes(color=factor(color))) +
         coord_cartesian(ylim=c(-100,100), xlim=c(-10, 10)) +
-        labs(ylab=expression(A*x^2)) + scale_color_discrete(name="A & -A") + 
+        ylab(expression(A*x^2)) + scale_color_discrete(name="A & -A") + 
         labs(title=c(expression(f(x) == A*x^2 + 2 ~~"for different A"))) 
 
 # varying B
